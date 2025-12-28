@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tb_instruction_memory_custom;
+module instruction_memory_tb;
 
     reg  [63:0] pc_addr;
     wire [31:0] instr_out;
