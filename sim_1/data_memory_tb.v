@@ -1,72 +1,61 @@
 
-`timescale 1ns / 1ps
-
-module data_memory_tb;
-reg         clk_sig;
-    reg         memWrite;
-    reg         memRead;
-    reg [63:0]  address;
-    reg [63:0]  data_in;
-    wire [63:0] data_out;
-    reg [63:0]  expected;
-
-    Data_Memory UUT (
-        .clk(clk_sig),
-        .MemWrite(memWrite),   
-        .MemRead(memRead),     
-        .addr(address),        
-        .write_data(data_in),   
-        .read_data(data_out)    
+module test_dmem;
+    reg clk = 0;
+    reg MemRead, MemWrite;
+    reg [63:0] addr, write_data;
+    wire [63:0] read_data;
+    
+    always #5 clk = ~clk;
+    
+    data_memory dmem(
+        .clk(clk),
+        .MemRead(MemRead),
+        .MemWrite(MemWrite),
+        .addr(addr),
+        .write_data(write_data),
+        .read_data(read_data)
     );
-
-    initial clk_sig = 0;
-    always #5 clk_sig = ~clk_sig;
-
+    
     initial begin
-        $display("Time\tAddr\tWE\tRE\tWData\t\t\tRData\t\t\tExpected");
+        $display("Testing Data Memory");
 
-        memWrite = 1; 
-        memRead = 0;
-
-        address = 64'd0;
-        data_in = 64'h1122_3344_5566_7788;  
-        expected = data_in;
+        MemRead = 0;
+        MemWrite = 0;
+        addr = 0;
+        write_data = 0;
+        
         #10;
-        $display("%0t\t%0d\t%b\t%b\t%h\t%h\t%h", $time, address, memWrite, memRead, data_in, data_out, expected);
-
-        address = 64'd8;
-        data_in = 64'hFFFF_0000_AAAA_5555; 
-        expected = data_in;
+        
+        $display("\nTest 1: Write 99 to address 32");
+        MemWrite = 1;
+        addr = 32;
+        write_data = 99;
         #10;
-        $display("%0t\t%0d\t%b\t%b\t%h\t%h\t%h", $time, address, memWrite, memRead, data_in, data_out, expected);
-
-        address = 64'd16;
-        data_in = 64'h9876_5432_10FE_DCBA;  
-        expected = data_in;
+        
+        $display("Test 2: Read from address 32");
+        MemWrite = 0;
+        MemRead = 1;
         #10;
-        $display("%0t\t%0d\t%b\t%b\t%h\t%h\t%h", $time, address, memWrite, memRead, data_in, data_out, expected);
-
-
-        memWrite = 0; 
-        memRead = 1;
-        data_in = 64'd0; 
-
-
-        address = 64'd0;
-        expected = 64'h1122_3344_5566_7788; 
+        $display("Read: %d (should be 99)", read_data);
+        
+        $display("\nTest 3: Write 255 to address 64");
+        MemWrite = 1;
+        MemRead = 0;
+        addr = 64;
+        write_data = 255;
         #10;
-        $display("%0t\t%0d\t%b\t%b\t%h\t%h\t%h", $time, address, memWrite, memRead, data_in, data_out, expected);
-
-        address = 64'd8;
-        expected = 64'hFFFF_0000_AAAA_5555; 
-        $display("%0t\t%0d\t%b\t%b\t%h\t%h\t%h", $time, address, memWrite, memRead, data_in, data_out, expected);
-
-        address = 64'd16;
-        expected = 64'h9876_5432_10FE_DCBA;
+        
+        $display("Test 4: Read from address 64");
+        MemWrite = 0;
+        MemRead = 1;
         #10;
-        $display("%0t\t%0d\t%b\t%b\t%h\t%h\t%h", $time, address, memWrite, memRead, data_in, data_out, expected);
-
+        $display("Read: %d (should be 255)", read_data);
+        
+        $display("\nTest 5: Check initial value at address 0");
+        addr = 0;
+        #10;
+        $display("Read: %d (should be 5)", read_data);
+        
         $finish;
     end
-
 endmodule
