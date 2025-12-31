@@ -1,40 +1,29 @@
-`timescale 1ns / 1ps
 
-module instruction_memory_tb;
-
-    reg  [63:0] pc_addr;
-    wire [31:0] instr_out;
-    reg  [31:0] expected;
-
-    Instruction_Memory UUT (
-        .address(pc_addr),
-        .instruction(instr_out)
-    );
-
+module test_imem;
+    reg [63:0] address;
+    wire [31:0] instruction;
+    
+    instruction_memory imem(.address(address), .instruction(instruction));
+    
     initial begin
-        $display("Time\tAddress\t\tInstruction (Hex)\tExpected");
+        $display("Testing Instruction Memory");
 
-        pc_addr = 64'd0;
-        expected = 32'h0000_0033; 
+        address = 0;
         #10;
-        $display("%0t\t%0d\t\t%h\t\t%h", $time, pc_addr, instr_out, expected);
-
-        pc_addr = 64'd4;
-        expected = 32'h00A5_0533; 
+        $display("PC=0: %h (addi x0,x0,7)", instruction);
+        
+        address = 4;
         #10;
-        $display("%0t\t%0d\t\t%h\t\t%h", $time, pc_addr, instr_out, expected);
-
-        pc_addr = 64'd8;
-        expected = 32'h4005_8533; 
+        $display("PC=4: %h (addi x13,x0,220)", instruction);
+        
+        address = 32; 
         #10;
-        $display("%0t\t%0d\t\t%h\t\t%h", $time, pc_addr, instr_out, expected);
-
-        pc_addr = 64'd12;
-        expected = 32'h0000_0000;
+        $display("PC=32: %h (ld x26,32(x0))", instruction);
+        
+        address = 44;
         #10;
-        $display("%0t\t%0d\t\t%h\t\t%h", $time, pc_addr, instr_out, expected);
-
+        $display("PC=44: %h (addi x1,x0,21)", instruction);
+        
         $finish;
     end
-
 endmodule
